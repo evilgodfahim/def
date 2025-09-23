@@ -1,0 +1,33 @@
+name: Update Defense / NATO / SpaceWar Feed
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install feedparser feedgen
+
+      - name: Run merge script
+        run: python merge_feeds.py
+
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add merged-defense.xml
+          git commit -m "Update merged defense feed" || echo "No changes to commit"
+          git push
